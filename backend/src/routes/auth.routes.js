@@ -1,14 +1,15 @@
 import express from "express";
+import {signup} from "../controllers/auth.controller.js";
 const router = express.Router();
 
-
-router.get("signup" , (req , res)=>{
-res.send("Signup endpoint");
-})
-router.get("login" , (req , res)=>{
+router.post("/signup", signup);
+router.post("/login" , (req , res)=>{
+    const { email, password } = req.body || {};
+    if (!email || !password) return res.status(400).json({ message: "Email and password are required" });
     res.send("login endpoint");
 })
-router.get("logout" , (req , res)=>{
+router.post("/logout" , (req , res)=>{
     res.send("logout endpoint");
 })
 export default router;
+
