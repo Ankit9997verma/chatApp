@@ -3,6 +3,7 @@ import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import User from "../models/User.js"
 import bcrypt from "bcryptjs";
 import {ENV} from "../lib/env.js";
+import cloudinary from "../lib/cloudinary.js"; 
 
 export const signup = async (req , res) =>{
      const {fullName , email , password} = req.body || {};
@@ -99,3 +100,48 @@ export const logout = async(_, res)=>{
     })
     res.status(200).json({message :"Logout successfully !"})
 };
+                  
+export const updateProfile = async(req , res)=>{
+    try{
+        const {profilePic} = req.body ;
+        if(!profilePic) return res.status(400).json({message : "Profile picture is required !"})
+
+        // Validate profilePic is a data URI with allowed MIME type
+        if(!profilePic.startsWith("data:image/")) {
+            return res.status(400).json({message : "Invalid image format. Expected data URI."});
+        }
+
+        const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg", "image/gif"];
+        const mimeMatch = profilePic.match(/^data:([^;]+);/);
+        const mimeType = mimeMatch ? mimeMatch[1] : null;
+        
+        if(!mimeType || !allowedMimeTypes.includes(mimeType)) {
+            return res.status(400).json({message : "Invalid image MIME type. Allowed: PNG, JPEG, GIF."});
+        }
+
+        // Validate base64 payload size (max 5MB)
+        const base64Length = profilePic.length;
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if(base64Length > maxSize) {
+            return res.status(400).json({message : "Image file too large. Maximum size is 5MB."});
+        }
+
+        const userId = req.user._id; // in  middleware we use it before initializing next 
+
+        const uploadResponse =await cloudinary.uploader.upload(profilePic);
+
+        const updatedUser =await User.findByIdAndUpdate(
+            userId, 
+            {profilePic : uploadResponse.secure_url}, 
+            {new:true}
+        );
+        
+        // Exclude password from response
+        const userResponse = updatedUser.toObject();
+        delete userResponse.password;
+        res.status(200).json(userResponse);
+    }catch(error){
+        console.log("error in uploading the file ", error);
+        res.status(500).json({message :"Internal server error "});
+    }
+}
