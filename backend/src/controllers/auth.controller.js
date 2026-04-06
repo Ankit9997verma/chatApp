@@ -1,10 +1,13 @@
 import {generateToken} from "../lib/utils.js"
-
+import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import User from "../models/User.js"
 import bcrypt from "bcryptjs";
+import {ENV} from "../lib/env.js";
+
 export const signup = async (req , res) =>{
+     const {fullName , email , password} = req.body || {};
     try{
-        const {fullName , email , password} = req.body || {};
+       
         if(!fullName || !email || !password){
             return res.status(400).json({message : "All fields are required"})
         }
@@ -26,8 +29,20 @@ export const signup = async (req , res) =>{
             fullName , 
             email , 
             password : hashedPassword
-        })
-        const savedUser = await newUser.save();
+        });
+
+        let savedUser;
+        try {
+          savedUser = await newUser.save();
+        } catch (saveError) {
+          console.error("Failed to save user:", saveError);
+          return res.status(500).json({ message: "Failed to create user" });
+        }
+
+        if (!savedUser) {
+          return res.status(500).json({ message: "Failed to create user" });
+        }
+
         generateToken(savedUser._id , res);
         // 201 means something created successfully 
         res.status(201).json({
@@ -36,6 +51,15 @@ export const signup = async (req , res) =>{
             email: savedUser.email,
             profilePic: savedUser.profilePic,
         });
+
+        // sending a welcome message to the user using resend.io...
+        try {
+          await sendWelcomeEmail(savedUser.email, savedUser.fullName, ENV.CLIENT_URL);
+        } catch (error) {
+          console.error("Failed to send welcome email:", error);
+        }
+
+
     }catch(error){
         console.log("error in signup controller" , error)
         res.status(500).json({message : "Internal server error !"})

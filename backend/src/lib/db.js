@@ -1,8 +1,9 @@
 import mongoose from "mongoose"
+import {ENV} from "./env.js"
 
 export const connectDB = async()=>{
     try{
-        const uri = process.env.MONGO_URI || process.env.MONGO_URL;
+        const uri = ENV.MONGO_URI || ENV.MONGO_URL;
         if(!uri){
             console.error("Error connecting to MongoDB: Missing MONGO_URI or MONGO_URL");
             process.exit(1);
