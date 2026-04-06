@@ -29,9 +29,20 @@ export const signup = async (req , res) =>{
             fullName , 
             email , 
             password : hashedPassword
-        })
-       if(newUser){
-        const savedUser = await newUser.save();
+        });
+
+        let savedUser;
+        try {
+          savedUser = await newUser.save();
+        } catch (saveError) {
+          console.error("Failed to save user:", saveError);
+          return res.status(500).json({ message: "Failed to create user" });
+        }
+
+        if (!savedUser) {
+          return res.status(500).json({ message: "Failed to create user" });
+        }
+
         generateToken(savedUser._id , res);
         // 201 means something created successfully 
         res.status(201).json({
@@ -42,15 +53,11 @@ export const signup = async (req , res) =>{
         });
 
         // sending a welcome message to the user using resend.io...
-
-         try {
-        await sendWelcomeEmail(savedUser.email, savedUser.fullName, ENV.CLIENT_URL);
-      } catch (error) {
-        console.error("Failed to send welcome email:", error);
-      }
-    }else{
-         res.status(400).json({ message: "Invalid user data" });
-    }
+        try {
+          await sendWelcomeEmail(savedUser.email, savedUser.fullName, ENV.CLIENT_URL);
+        } catch (error) {
+          console.error("Failed to send welcome email:", error);
+        }
 
 
     }catch(error){
