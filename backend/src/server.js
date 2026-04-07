@@ -15,15 +15,20 @@ const PORT = ENV.PORT || 3000;
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl requests, or Railway health checks)
+    if (!origin) return callback(null, true);
+    
     if (ENV.NODE_ENV !== "production") {
-      callback(null, true);
-      return;
+      return callback(null, true);
     }
+    
+    // Check if origin matches the allowed CLIENT_URL exactly
     if (origin === ENV.CLIENT_URL) {
-      callback(null, true);
-      return;
+      return callback(null, true);
     }
-    callback(new Error("Not allowed by CORS"));
+    
+    // Rather than throwing an Error struct which can crash the router, just disallow.
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
 };
@@ -42,7 +47,7 @@ app.get('/', (req, res) => {
   res.send('Chat App Backend is running successfully!');
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port: " + PORT);
   connectDB();
 });
