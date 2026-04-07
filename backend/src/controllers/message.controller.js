@@ -1,6 +1,7 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
+import { io, getReceiverSocketId } from "../lib/socket.js";
 export const getAllContacts = async (req , res)=>{
     try {
         // yha par humko saree contacts chaiye sirf apne app ko skip kar ke .
@@ -27,7 +28,7 @@ export const getMessagesByUserId = async(req , res)=>{
                 {senderId:userToChatId , receiverId: myId}
             ]
         })
-        res.status(200).json(messages);
+        res.status(200).json(message);
     }catch(error){
 
     }
