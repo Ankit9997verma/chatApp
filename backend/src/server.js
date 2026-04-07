@@ -36,15 +36,11 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// make ready for deployment
-if (ENV.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
-  app.get("*", (_, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-  });
-}
-
+// Since frontend is deployed to Vercel separately, we don't serve frontend from here.
+// Provide a basic root route for health checks
+app.get('/', (req, res) => {
+  res.send('Chat App Backend is running successfully!');
+});
 
 server.listen(PORT, () => {
   console.log("Server running on port: " + PORT);

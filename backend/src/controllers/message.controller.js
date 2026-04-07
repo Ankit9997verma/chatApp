@@ -97,3 +97,5 @@ export const getChatPartners= async(req , res)=>{
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+//chatapp-production-6d04.up.railway.app
