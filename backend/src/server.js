@@ -13,8 +13,24 @@ const __dirname = path.resolve();
 
 const PORT = ENV.PORT || 3000;
 
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (ENV.NODE_ENV !== "production") {
+      callback(null, true);
+      return;
+    }
+    if (origin === ENV.CLIENT_URL) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
+
 app.use(express.json({ limit: "5mb" })); // req.body
-app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
