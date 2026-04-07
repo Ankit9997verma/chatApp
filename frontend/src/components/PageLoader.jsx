@@ -7,4 +7,4 @@ function PageLoader(){
          </div>
     )
 }
-export default PageLoader ;
+export default PageLoader ;                      
