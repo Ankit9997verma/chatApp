@@ -61,6 +61,14 @@ This repository includes a [`render.yaml`](./render.yaml) Blueprint for a
 single Render web service. It builds the frontend and serves it, the API, and
 Socket.IO from the backend on the same origin.
 
+The Render build command explicitly installs frontend development dependencies
+because Vite is a dev dependency and is required to build the frontend.
+If configuring the service manually instead of using the Blueprint, use:
+
+```sh
+npm ci --prefix backend && npm ci --include=dev --prefix frontend && npm run build --prefix frontend
+```
+
 1. Push the repository to GitHub and make sure `render.yaml` is included.
 2. In Render, choose **New + > Blueprint**, connect this repository, and deploy
    the Blueprint. Render generates `JWT_SECRET` and prompts you for `MONGO_URI`.
