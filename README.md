@@ -51,9 +51,15 @@ Run `npm run build` from the repository root to install dependencies and build
 the frontend. Configure the backend environment for your deployment, then run
 `npm start` from the repository root. The backend serves the built frontend.
 
-For a separate frontend deployment, set `VITE_BACKEND_URL` to the backend
-origin when building the frontend. Configure `CLIENT_URL` on the backend to the
-frontend's origin.
+For a separate frontend deployment (for example, Vercel hosting the frontend
+and Render hosting the backend), configure both sides:
+
+- Set `VITE_BACKEND_URL` in Vercel to the Render service origin, such as
+  `https://chatapp-hvpl.onrender.com`. This is used for both API requests and
+  Socket.IO connections. Redeploy the Vercel frontend after setting it.
+- Set `CLIENT_URL` in Render to the Vercel site's exact origin, such as
+  `https://your-app.vercel.app`, with no trailing slash. This origin is used by
+  the backend's HTTP and Socket.IO CORS rules.
 
 ## Deploy to Render
 
